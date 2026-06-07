@@ -9,7 +9,6 @@ TOKEN = os.getenv("TOKEN")
 intents = discord.Intents.default()
 intents.message_content = True
 
-# Bot クラスを拡張してスラッシュコマンド同期を自動化
 class MyBot(commands.Bot):
     async def setup_hook(self):
         await self.tree.sync()
@@ -21,13 +20,28 @@ bot = MyBot(command_prefix="!", intents=intents)
 async def on_ready():
     print(f"ログインしました: {bot.user}")
 
-# スラッシュコマンド（/omikuji）
-@bot.tree.command(name="omikuji", description="今日の運勢を占います")
+@bot.tree.command(name="omikuji", description="画像付きおみくじを引きます")
 async def omikuji(interaction: discord.Interaction):
-    results = ["大吉", "中吉", "小吉", "吉", "末吉", "凶", "大凶"]
-    choice = random.choice(results)
+
+    fortunes = [
+        ("大吉", "daikichi.jpeg"),
+        ("中吉", "chukichi.jpeg"),
+        ("吉", "kichi.jpeg"),
+        ("小吉", "shokichi.jpeg"),
+        ("末吉", "suekichi.jpeg"),
+        ("凶", "kyou.jpeg"),
+        ("？？？", "extra.jpeg")
+    ]
+
+    fortune, filename = random.choice(fortunes)
+
+    # フォルダ分けに対応したパス
+    img_path = f"omikuji_images/{filename}"
+
+    file = discord.File(img_path)
     await interaction.response.send_message(
-        f"{interaction.user.mention} の今日の運勢は… **{choice}** です！"
+        f"{interaction.user.mention} の今日の運勢は… **{fortune}** です！",
+        file=file
     )
 
 bot.run(TOKEN)
