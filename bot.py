@@ -20,7 +20,7 @@ bot = MyBot(command_prefix="!", intents=intents)
 async def on_ready():
     print(f"ログインしました: {bot.user}")
 
-@bot.tree.command(name="omikuji", description="画像付きおみくじを引きます")
+@bot.tree.command(name="omikuji", description="オミくじを引きます")
 async def omikuji(interaction: discord.Interaction):
 
     fortunes = [
@@ -30,7 +30,7 @@ async def omikuji(interaction: discord.Interaction):
         ("小吉", "shokichi.jpeg"),
         ("末吉", "suekichi.jpeg"),
         ("凶", "kyou.jpeg"),
-        ("？？？", "extra.jpeg")
+        ("！！！", "extra.jpeg")
     ]
 
     fortune, filename = random.choice(fortunes)
