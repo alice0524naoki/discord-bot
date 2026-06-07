@@ -23,6 +23,7 @@ async def on_ready():
 @bot.tree.command(name="omikuji", description="オミくじを引きます")
 async def omikuji(interaction: discord.Interaction):
 
+    # 運勢と画像ファイル名
     fortunes = [
         ("大吉", "daikichi.jpeg"),
         ("中吉", "chukichi.jpeg"),
@@ -33,12 +34,24 @@ async def omikuji(interaction: discord.Interaction):
         ("！！！", "extra.jpeg")
     ]
 
-    fortune, filename = random.choice(fortunes)
+    # 各運勢の確率（合計100でなくてもOK）
+    weights = [
+        15,  # 大吉
+        20,  # 中吉
+        25,  # 吉
+        25,  # 小吉
+        20,  # 末吉
+        10,  # 凶
+        5    # ！！！
+    ]
 
-    # フォルダ分けに対応したパス
+    # 重み付きランダム
+    fortune, filename = random.choices(fortunes, weights=weights, k=1)[0]
+
+    # フォルダ分け対応
     img_path = f"omikuji_images/{filename}"
-
     file = discord.File(img_path)
+
     await interaction.response.send_message(
         f"{interaction.user.mention} の今日の運勢は… **{fortune}** です！",
         file=file
