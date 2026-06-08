@@ -9,7 +9,8 @@ def generate_pdf(data, filename):
         width, height = A4
 
         c.setFont("Helvetica-Bold", 16)
-        c.drawString(50, height - 50, f"{data['title']} ({data['date']}) 受付結果")
+        c.drawString(50, height - 50, f"{data['title']} ({data['date_display']}) 受付結果")
+
 
         y = height - 80
         c.setFont("Helvetica-Bold", 12)
