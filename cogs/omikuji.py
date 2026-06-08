@@ -19,7 +19,7 @@ class Omikuji(commands.Cog):
             ("！！！", "extra.jpeg")
         ]
 
-        weights = [15, 20, 25, 25, 20, 10, 5]
+        weights = [15, 20, 20, 20, 20, 10, 10]
 
         fortune, filename = random.choices(fortunes, weights=weights, k=1)[0]
 
