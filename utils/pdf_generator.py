@@ -21,42 +21,50 @@ def generate_pdf(data, filename):
             f"{data['title']} ({data['date_display']}) 受付結果"
         )
 
-        # 本登録
+        # --- 本登録ページ ---
         y = height - 80
         c.setFont("IPAexGothic", 12)
         c.drawString(50, y, "【本登録：名前昇順】")
         y -= 20
 
-        entries = sorted(data["entries"], key=lambda x: x["name"])
-        c.setFont("IPAexGothic", 10)
+        # ニックネーム優先でソート
+        entries = sorted(
+            data["entries"],
+            key=lambda x: x.get("nickname") or x["name"]
+        )
 
+        c.setFont("IPAexGothic", 10)
         no = 1
         for e in entries:
+            display_name = e.get("nickname") or e["name"]
             c.drawString(50, y, f"{no}")
             c.drawString(90, y, f"{e['number']}")
-            c.drawString(150, y, e["name"])
+            c.drawString(150, y, display_name)
             c.drawString(250, y, e["user"])
             c.drawString(350, y, e["timestamp"])
             y -= 15
             no += 1
 
-        # 次ページ：仮登録
-        c.showPage()
-        y = height - 50
-        c.setFont("IPAexGothic", 12)
-        c.drawString(50, y, "【仮登録：入力順】")
-        y -= 20
+        # --- 仮登録ページ（pending がある場合のみ） ---
+        if data["pending"]:
+            c.showPage()
+            y = height - 50
+            c.setFont("IPAexGothic", 12)
+            c.drawString(50, y, "【仮登録：入力順】")
+            y -= 20
 
-        c.setFont("IPAexGothic", 10)
-        no = 1
-        for p in data["pending"]:
-            c.drawString(50, y, f"{no}")
-            c.drawString(150, y, p["name"])
-            c.drawString(250, y, p["user"])
-            c.drawString(350, y, p["timestamp"])
-            y -= 15
-            no += 1
+            c.setFont("IPAexGothic", 10)
+            no = 1
+            for p in data["pending"]:
+                display_name = p.get("nickname") or p["name"]
+                c.drawString(50, y, f"{no}")
+                c.drawString(150, y, display_name)
+                c.drawString(250, y, p["user"])
+                c.drawString(350, y, p["timestamp"])
+                y -= 15
+                no += 1
 
+        # 保存
         c.save()
 
         # 生成確認
