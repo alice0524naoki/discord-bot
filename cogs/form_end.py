@@ -2,7 +2,10 @@ import discord
 from discord.ext import commands
 import os
 from utils.pdf_generator import generate_pdf
+import re
 
+def sanitize_filename(name: str) -> str:
+    return re.sub(r'[\\/:*?"<>|]', '_', name)
 
 class FormEnd(commands.Cog):
     def __init__(self, bot):
@@ -22,29 +25,31 @@ class FormEnd(commands.Cog):
             )
             return
 
-        # ★ 最初に応答（3秒以内に必須）
+        # ★ 最初に応答（3秒以内）
         await interaction.response.defer()
 
-        # ピン解除（ピン留めを使わないなら削除してもOK）
-        try:
-            msg = await interaction.channel.fetch_message(data["message_id"])
-            await msg.unpin()
-        except:
-            pass
+        # 表示用とファイル名用を分離
+        safe_title = sanitize_filename(data["title"])
+        safe_date = sanitize_filename(data["date_file"])  # ← m-d が入っている
 
-        # PDF生成
-        filename = f"{data['title']}_{data['date']}.pdf"
-        generate_pdf(data, filename)
+        filename = f"{safe_title}_{safe_date}.pdf"
+
+        print(f"[PDF] 生成開始: {filename}")
+
+        try:
+            generate_pdf(data, filename)
+        except Exception as e:
+            print(f"[PDF] 例外発生: {e}")
+            await interaction.followup.send(f"PDF生成中にエラーが発生しました: {e}")
+            return
 
         abs_path = os.path.abspath(filename)
 
-        # followup で PDF を送信
         await interaction.followup.send(
             "受付を終了しました。PDFを出力します。",
             file=discord.File(abs_path)
         )
 
-        # データ初期化
         self.bot.event_data = None
 
 
