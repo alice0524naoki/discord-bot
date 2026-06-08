@@ -88,3 +88,5 @@ class DeleteEntryModal(discord.ui.Modal, title="参加者削除"):
             await interaction.response.send_message(f"{old_num} {old_name} を削除しました。")
         else:
             await interaction.response.send_message("該当者が見つかりません。", ephemeral=True)
+async def setup(bot):
+    pass
