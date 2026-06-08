@@ -1,6 +1,11 @@
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 import os
+
+# 日本語フォントの登録（fonts/IPAexGothic.ttf を配置してください）
+pdfmetrics.registerFont(TTFont("IPAexGothic", "fonts/IPAexGothic.ttf"))
 
 def generate_pdf(data, filename):
     print(f"[PDF] 生成開始: {filename}")
@@ -8,17 +13,22 @@ def generate_pdf(data, filename):
         c = canvas.Canvas(filename, pagesize=A4)
         width, height = A4
 
-        c.setFont("Helvetica-Bold", 16)
-        c.drawString(50, height - 50, f"{data['title']} ({data['date_display']}) 受付結果")
+        # タイトル部分
+        c.setFont("IPAexGothic", 16)
+        c.drawString(
+            50,
+            height - 50,
+            f"{data['title']} ({data['date_display']}) 受付結果"
+        )
 
-
+        # 本登録
         y = height - 80
-        c.setFont("Helvetica-Bold", 12)
+        c.setFont("IPAexGothic", 12)
         c.drawString(50, y, "【本登録：名前昇順】")
         y -= 20
 
         entries = sorted(data["entries"], key=lambda x: x["name"])
-        c.setFont("Helvetica", 10)
+        c.setFont("IPAexGothic", 10)
 
         no = 1
         for e in entries:
@@ -30,13 +40,14 @@ def generate_pdf(data, filename):
             y -= 15
             no += 1
 
+        # 次ページ：仮登録
         c.showPage()
         y = height - 50
-        c.setFont("Helvetica-Bold", 12)
+        c.setFont("IPAexGothic", 12)
         c.drawString(50, y, "【仮登録：入力順】")
         y -= 20
 
-        c.setFont("Helvetica", 10)
+        c.setFont("IPAexGothic", 10)
         no = 1
         for p in data["pending"]:
             c.drawString(50, y, f"{no}")
@@ -48,7 +59,7 @@ def generate_pdf(data, filename):
 
         c.save()
 
-        # ★ 生成後の存在チェック
+        # 生成確認
         if os.path.exists(filename):
             print(f"[PDF] 生成成功: {filename}")
         else:
