@@ -41,8 +41,11 @@ class StartFormModal(discord.ui.Modal, title="受付フォーム設定"):
 
         self.bot.event_data["message_id"] = msg.id
 
-        # ★ フォーム送信後に自動で閉じる
-        await interaction.response.send_message("受付を開始しました。", ephemeral=True)
+        # ★ ここを削除：メッセージを返さない → Modal は自動で閉じる
+        # await interaction.response.send_message("受付を開始しました。", ephemeral=True)
+
+        # ★ 代わりに「応答なし」で閉じる
+        await interaction.response.defer()  # これで静かに閉じる
 
 
 class FormStart(commands.Cog):
