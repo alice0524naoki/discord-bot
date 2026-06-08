@@ -4,7 +4,7 @@ from .entry_buttons import EntryButtonsView
 
 class StartFormModal(discord.ui.Modal, title="受付フォーム設定"):
     title_input = discord.ui.TextInput(label="タイトル", required=True)
-    date_input = discord.ui.TextInput(label="開催日", required=True)
+    date_input = discord.ui.TextInput(label="開催日（m/d）", required=True)
     limit_input = discord.ui.TextInput(label="定員数", required=True)
     allow_over_input = discord.ui.TextInput(label="上限超過可否（はい/いいえ）", required=True)
 
@@ -13,14 +13,20 @@ class StartFormModal(discord.ui.Modal, title="受付フォーム設定"):
         self.bot = bot
 
     async def on_submit(self, interaction: discord.Interaction):
+
+        # ★ 最初に応答（何も表示しない）
+        await interaction.response.defer(ephemeral=True)
+
         title = self.title_input.value
-        date = self.date_input.value
+        date_display = self.date_input.value  # 表示用（m/d）
+        date_file = date_display.replace("/", "-")  # ファイル名用（m-d）
         limit = int(self.limit_input.value)
         allow_over = self.allow_over_input.value.lower() in ["はい", "yes", "true"]
 
         self.bot.event_data = {
             "title": title,
-            "date": date,
+            "date_display": date_display,  # 表示用
+            "date_file": date_file,        # ファイル名用
             "limit": limit,
             "allow_over": allow_over,
             "entries": [],
@@ -32,14 +38,11 @@ class StartFormModal(discord.ui.Modal, title="受付フォーム設定"):
         view = EntryButtonsView(self.bot)
         msg = await interaction.channel.send(
             f"**{title}** の受付を開始しました\n"
-            f"開催日: {date}　定員: {limit}",
+            f"開催日: {date_display}　定員: {limit}",
             view=view
         )
 
         self.bot.event_data["message_id"] = msg.id
-
-        # ★ これが正解：何も表示せずに正常終了
-        await interaction.response.defer(ephemeral=True)
 
 
 class FormStart(commands.Cog):
