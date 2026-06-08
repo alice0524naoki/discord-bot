@@ -36,16 +36,10 @@ class StartFormModal(discord.ui.Modal, title="受付フォーム設定"):
             view=view
         )
 
-        # ★ ピン留め削除済
-        # await msg.pin()
-
         self.bot.event_data["message_id"] = msg.id
 
-        # ★ ここを削除：メッセージを返さない → Modal は自動で閉じる
-        # await interaction.response.send_message("受付を開始しました。", ephemeral=True)
-
-        # ★ 代わりに「応答なし」で閉じる
-        await interaction.response.defer()  # これで静かに閉じる
+        # ★ ここが重要：空文字を返す → 画面には何も表示されない
+        await interaction.response.send_message("", ephemeral=True)
 
 
 class FormStart(commands.Cog):
@@ -55,7 +49,6 @@ class FormStart(commands.Cog):
     @discord.app_commands.command(name="form_start", description="受付フォームを開始します")
     async def form_start(self, interaction: discord.Interaction):
 
-        # ★ 受付中チェック
         if self.bot.event_data is not None:
             await interaction.response.send_message(
                 "すでに受付が開始されています。\n終了するには /form_end を実行してください。",
