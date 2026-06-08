@@ -18,7 +18,6 @@ class AddEntryModal(discord.ui.Modal, title="参加者追加（最大5名）"):
     async def on_submit(self, interaction: discord.Interaction):
         data = self.bot.event_data
 
-        # 入力された名前をリスト化（空欄は除外）
         names = [
             self.name1.value,
             self.name2.value,
@@ -36,7 +35,7 @@ class AddEntryModal(discord.ui.Modal, title="参加者追加（最大5名）"):
 
             entry_data = {
                 "name": name,
-                "user": interaction.user.display_name,  # ← 表示名で保存
+                "user": interaction.user.display_name,
                 "timestamp": now,
             }
 
@@ -52,9 +51,10 @@ class AddEntryModal(discord.ui.Modal, title="参加者追加（最大5名）"):
 
 
 # -----------------------------
-# 参加者変更
+# 参加者変更（本登録のみ）
 # -----------------------------
 class ChangeEntryModal(discord.ui.Modal, title="参加者変更"):
+    old_number = discord.ui.TextInput(label="変更前の番号", required=True)
     old_name = discord.ui.TextInput(label="変更前の名前", required=True)
     new_name = discord.ui.TextInput(label="変更後の名前", required=True)
 
@@ -64,30 +64,32 @@ class ChangeEntryModal(discord.ui.Modal, title="参加者変更"):
 
     async def on_submit(self, interaction):
         data = self.bot.event_data
-        old = self.old_name.value
-        new = self.new_name.value
 
-        # 本登録
+        # 仮登録は番号が無いので変更不可
+        if not self.old_number.value.isdigit():
+            await interaction.response.send_message("仮登録は変更できません。")
+            return
+
+        old_num = int(self.old_number.value)
+        old_name = self.old_name.value
+        new_name = self.new_name.value
+
         for e in data["entries"]:
-            if e["name"] == old:
-                e["name"] = new
-                await interaction.response.send_message(f"{old} を {new} に変更しました。")
+            if e["number"] == old_num and e["name"] == old_name:
+                e["name"] = new_name
+                await interaction.response.send_message(
+                    f"{old_num} {old_name} を {new_name} に変更しました。"
+                )
                 return
 
-        # 仮登録
-        for p in data["pending"]:
-            if p["name"] == old:
-                p["name"] = new
-                await interaction.response.send_message(f"{old}（仮登録）を {new} に変更しました。")
-                return
-
-        await interaction.response.send_message("該当する名前が見つかりませんでした。")
+        await interaction.response.send_message("該当する本登録の参加者が見つかりませんでした。")
 
 
 # -----------------------------
-# 参加者削除
+# 参加者削除（本登録 or 仮登録）
 # -----------------------------
 class DeleteEntryModal(discord.ui.Modal, title="参加者削除"):
+    number = discord.ui.TextInput(label="削除する番号（仮登録の場合は「仮登録」と入力）", required=True)
     name = discord.ui.TextInput(label="削除する名前", required=True)
 
     def __init__(self, bot):
@@ -96,23 +98,45 @@ class DeleteEntryModal(discord.ui.Modal, title="参加者削除"):
 
     async def on_submit(self, interaction):
         data = self.bot.event_data
+
+        num_text = self.number.value
         name = self.name.value
 
-        # 本登録
-        for e in data["entries"]:
-            if e["name"] == name:
-                data["entries"].remove(e)
-                await interaction.response.send_message(f"{name} を削除しました。")
-                return
+        # -------------------------
+        # 仮登録の削除
+        # -------------------------
+        if num_text == "仮登録":
+            for p in data["pending"]:
+                if p["name"] == name:
+                    data["pending"].remove(p)
+                    await interaction.response.send_message(
+                        f"仮登録 {name} を削除しました。"
+                    )
+                    return
 
-        # 仮登録
-        for p in data["pending"]:
-            if p["name"] == name:
-                data["pending"].remove(p)
-                await interaction.response.send_message(f"{name}（仮登録）を削除しました。")
-                return
+            await interaction.response.send_message("該当する仮登録が見つかりませんでした。")
+            return
 
-        await interaction.response.send_message("該当する名前が見つかりませんでした。")
+        # -------------------------
+        # 本登録の削除
+        # -------------------------
+        if num_text.isdigit():
+            num = int(num_text)
+            for e in data["entries"]:
+                if e["number"] == num and e["name"] == name:
+                    data["entries"].remove(e)
+                    await interaction.response.send_message(
+                        f"{num} {name} を削除しました。"
+                    )
+                    return
+
+            await interaction.response.send_message("該当する本登録の参加者が見つかりませんでした。")
+            return
+
+        # -------------------------
+        # それ以外の入力
+        # -------------------------
+        await interaction.response.send_message("番号には数字か「仮登録」を入力してください。")
 
 
 async def setup(bot):
