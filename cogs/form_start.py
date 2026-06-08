@@ -38,7 +38,7 @@ class StartFormModal(discord.ui.Modal, title="受付フォーム設定"):
 
         self.bot.event_data["message_id"] = msg.id
 
-        # ★ ここが重要：空文字を返す → 画面には何も表示されない
+        # ★ これが唯一「何も表示せずに正常終了」できる方法
         await interaction.response.send_message("", ephemeral=True)
 
 
