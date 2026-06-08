@@ -32,12 +32,13 @@ class StartFormModal(discord.ui.Modal, title="受付フォーム設定"):
         view = EntryButtonsView(self.bot)
         msg = await interaction.channel.send(
             f"**{title}** の受付を開始しました\n"
-            f"開催日: {date}　定員: {limit}\n",
+            f"開催日: {date}　定員: {limit}",
             view=view
         )
         await msg.pin()
         self.bot.event_data["message_id"] = msg.id
 
+        # ★フォーム送信後に自動で閉じる（ephemeral）
         await interaction.response.send_message("受付を開始しました。", ephemeral=True)
 
 
@@ -48,7 +49,7 @@ class FormStart(commands.Cog):
     @discord.app_commands.command(name="form_start", description="受付フォームを開始します")
     async def form_start(self, interaction: discord.Interaction):
 
-        # ★ 受付中チェック（重要）
+        # ★受付中チェック
         if self.bot.event_data is not None:
             await interaction.response.send_message(
                 "すでに受付が開始されています。\n終了するには /form_end を実行してください。",
@@ -56,7 +57,6 @@ class FormStart(commands.Cog):
             )
             return
 
-        # 受付が開始されていない場合のみフォームを出す
         modal = StartFormModal(self.bot)
         await interaction.response.send_modal(modal)
 
