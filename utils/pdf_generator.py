@@ -24,24 +24,24 @@ def generate_pdf(data, filename):
         # --- 本登録ページ ---
         y = height - 80
         c.setFont("IPAexGothic", 12)
-        c.drawString(50, y, "【本登録：名前昇順】")
+        c.drawString(50, y, "【本登録：参加者名昇順】")
         y -= 20
 
-        # ニックネーム優先でソート
+        # 参加者名（name）のみでソート
         entries = sorted(
             data["entries"],
-            key=lambda x: x.get("nickname") or x["name"]
+            key=lambda x: x["name"]
         )
 
         c.setFont("IPAexGothic", 10)
         no = 1
         for e in entries:
-            display_name = e.get("nickname") or e["name"]
-            c.drawString(50, y, f"{no}")
-            c.drawString(90, y, f"{e['number']}")
-            c.drawString(150, y, display_name)
-            c.drawString(250, y, e["user"])
-            c.drawString(350, y, e["timestamp"])
+            participant_name = e["name"]          # 記入された参加者名のみ
+            c.drawString(50, y, f"{no}")          # No.（ソート対象外）
+            c.drawString(90, y, f"{e['number']}") # 番号（登録順）
+            c.drawString(150, y, participant_name) # 参加者名
+            c.drawString(250, y, e["user"])       # 登録者名（表示名）
+            c.drawString(350, y, e["timestamp"])  # 時間
             y -= 15
             no += 1
 
@@ -56,10 +56,10 @@ def generate_pdf(data, filename):
             c.setFont("IPAexGothic", 10)
             no = 1
             for p in data["pending"]:
-                display_name = p.get("nickname") or p["name"]
-                c.drawString(50, y, f"{no}")
-                c.drawString(150, y, display_name)
-                c.drawString(250, y, p["user"])
+                participant_name = p["name"]       # 記入された参加者名のみ
+                c.drawString(50, y, f"{no}")       # No.
+                c.drawString(150, y, participant_name)
+                c.drawString(250, y, p["user"])    # 登録者名（表示名）
                 c.drawString(350, y, p["timestamp"])
                 y -= 15
                 no += 1
