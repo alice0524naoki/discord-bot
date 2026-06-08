@@ -14,19 +14,19 @@ class StartFormModal(discord.ui.Modal, title="受付フォーム設定"):
 
     async def on_submit(self, interaction: discord.Interaction):
 
-        # ★ 最初に応答（何も表示しない）
         await interaction.response.defer(ephemeral=True)
 
         title = self.title_input.value
-        date_display = self.date_input.value  # 表示用（m/d）
-        date_file = date_display.replace("/", "-")  # ファイル名用（m-d）
+        date_display = self.date_input.value      # 例：5/6
+        date_file = date_display.replace("/", "-")  # 例：5-6
+
         limit = int(self.limit_input.value)
         allow_over = self.allow_over_input.value.lower() in ["はい", "yes", "true"]
 
         self.bot.event_data = {
             "title": title,
-            "date_display": date_display,  # 表示用
-            "date_file": date_file,        # ファイル名用
+            "date_display": date_display,
+            "date_file": date_file,
             "limit": limit,
             "allow_over": allow_over,
             "entries": [],
