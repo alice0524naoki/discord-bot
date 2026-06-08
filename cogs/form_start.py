@@ -32,8 +32,7 @@ class StartFormModal(discord.ui.Modal, title="受付フォーム設定"):
         view = EntryButtonsView(self.bot)
         msg = await interaction.channel.send(
             f"**{title}** の受付を開始しました\n"
-            f"開催日: {date}　定員: {limit}\n"
-            f"[追加] [変更] [削除]",
+            f"開催日: {date}　定員: {limit}\n",
             view=view
         )
         await msg.pin()
