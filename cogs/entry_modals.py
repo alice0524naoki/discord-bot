@@ -2,23 +2,11 @@ import discord
 from datetime import datetime
 
 # -----------------------------
-# 参加者追加（最大5名）
+# 参加者追加（1名）
 # -----------------------------
-class AddEntryModal(discord.ui.Modal, title="参加者追加（最大5名）"):
-    name1 = discord.ui.TextInput(label="名前1", required=True)
-    nickname1 = discord.ui.TextInput(label="ニックネーム1（任意）", required=False)
-
-    name2 = discord.ui.TextInput(label="名前2（任意）", required=False)
-    nickname2 = discord.ui.TextInput(label="ニックネーム2（任意）", required=False)
-
-    name3 = discord.ui.TextInput(label="名前3（任意）", required=False)
-    nickname3 = discord.ui.TextInput(label="ニックネーム3（任意）", required=False)
-
-    name4 = discord.ui.TextInput(label="名前4（任意）", required=False)
-    nickname4 = discord.ui.TextInput(label="ニックネーム4（任意）", required=False)
-
-    name5 = discord.ui.TextInput(label="名前5（任意）", required=False)
-    nickname5 = discord.ui.TextInput(label="ニックネーム5（任意）", required=False)
+class AddEntryModal(discord.ui.Modal, title="参加者追加"):
+    name = discord.ui.TextInput(label="名前", required=True)
+    nickname = discord.ui.TextInput(label="ニックネーム（任意）", required=False)
 
     def __init__(self, bot):
         super().__init__()
@@ -27,40 +15,28 @@ class AddEntryModal(discord.ui.Modal, title="参加者追加（最大5名）"):
     async def on_submit(self, interaction: discord.Interaction):
         data = self.bot.event_data
 
-        # 名前とニックネームをペアで扱う
-        entries_raw = [
-            (self.name1.value, self.nickname1.value),
-            (self.name2.value, self.nickname2.value),
-            (self.name3.value, self.nickname3.value),
-            (self.name4.value, self.nickname4.value),
-            (self.name5.value, self.nickname5.value),
-        ]
+        name = self.name.value
+        nickname = self.nickname.value or None
 
-        # 空欄を除外
-        entries_raw = [(n, nn) for n, nn in entries_raw if n]
+        total = len(data["entries"]) + len(data["pending"]) + 1
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        messages = []
+        entry_data = {
+            "name": name,
+            "nickname": nickname,
+            "user": interaction.user.display_name,  # ← Discord の表示名を保存
+            "timestamp": now,
+        }
 
-        for name, nickname in entries_raw:
-            total = len(data["entries"]) + len(data["pending"]) + 1
-            now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        if total <= data["limit"]:
+            entry_data["number"] = total
+            data["entries"].append(entry_data)
+            msg = f"{total} {name} を登録しました。"
+        else:
+            data["pending"].append(entry_data)
+            msg = f"仮登録 {name} を登録しました。"
 
-            entry_data = {
-                "name": name,
-                "nickname": nickname if nickname else None,
-                "user": interaction.user.name,
-                "timestamp": now,
-            }
-
-            if total <= data["limit"]:
-                entry_data["number"] = total
-                data["entries"].append(entry_data)
-                messages.append(f"{total} {name} を登録しました。")
-            else:
-                data["pending"].append(entry_data)
-                messages.append(f"仮登録 {name} を登録しました。")
-
-        await interaction.response.send_message("\n".join(messages))
+        await interaction.response.send_message(msg)
 
 
 # -----------------------------
