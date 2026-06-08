@@ -35,7 +35,6 @@ class StartFormModal(discord.ui.Modal, title="受付フォーム設定"):
             f"開催日: {date}　定員: {limit}",
             view=view
         )
-        await msg.pin()
         self.bot.event_data["message_id"] = msg.id
 
         # ★フォーム送信後に自動で閉じる（ephemeral）
