@@ -50,7 +50,8 @@ class AddEntryModal(discord.ui.Modal, title="参加者追加（最大5名）"):
                 data["pending"].append(pending)
                 messages.append(f"仮登録 {pending['name']} を登録しました。")
 
-        await interaction.response.send_message("\n".join(messages), ephemeral=True)
+        # ★ ここを修正：ephemeral=False（全員に見える）
+        await interaction.response.send_message("\n".join(messages))
 
 
 class ChangeEntryModal(discord.ui.Modal, title="参加者変更"):
@@ -69,10 +70,10 @@ class ChangeEntryModal(discord.ui.Modal, title="参加者変更"):
         for e in data["entries"]:
             if e["name"] == old:
                 e["name"] = new
-                await interaction.response.send_message(f"{old} を {new} に変更しました。", ephemeral=True)
+                await interaction.response.send_message(f"{old} を {new} に変更しました。")
                 return
 
-        await interaction.response.send_message("該当する名前が見つかりませんでした。", ephemeral=True)
+        await interaction.response.send_message("該当する名前が見つかりませんでした。")
 
 
 class DeleteEntryModal(discord.ui.Modal, title="参加者削除"):
@@ -89,10 +90,10 @@ class DeleteEntryModal(discord.ui.Modal, title="参加者削除"):
         for e in data["entries"]:
             if e["name"] == name:
                 data["entries"].remove(e)
-                await interaction.response.send_message(f"{name} を削除しました。", ephemeral=True)
+                await interaction.response.send_message(f"{name} を削除しました。")
                 return
 
-        await interaction.response.send_message("該当する名前が見つかりませんでした。", ephemeral=True)
+        await interaction.response.send_message("該当する名前が見つかりませんでした。")
 
 
 async def setup(bot):
