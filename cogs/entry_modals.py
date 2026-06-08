@@ -2,11 +2,14 @@ import discord
 from datetime import datetime
 
 # -----------------------------
-# 参加者追加（1名）
+# 参加者追加（最大5名）
 # -----------------------------
-class AddEntryModal(discord.ui.Modal, title="参加者追加"):
-    name = discord.ui.TextInput(label="名前", required=True)
-    nickname = discord.ui.TextInput(label="ニックネーム（任意）", required=False)
+class AddEntryModal(discord.ui.Modal, title="参加者追加（最大5名）"):
+    name1 = discord.ui.TextInput(label="名前1", required=True)
+    name2 = discord.ui.TextInput(label="名前2（任意）", required=False)
+    name3 = discord.ui.TextInput(label="名前3（任意）", required=False)
+    name4 = discord.ui.TextInput(label="名前4（任意）", required=False)
+    name5 = discord.ui.TextInput(label="名前5（任意）", required=False)
 
     def __init__(self, bot):
         super().__init__()
@@ -15,28 +18,37 @@ class AddEntryModal(discord.ui.Modal, title="参加者追加"):
     async def on_submit(self, interaction: discord.Interaction):
         data = self.bot.event_data
 
-        name = self.name.value
-        nickname = self.nickname.value or None
+        # 入力された名前をリスト化（空欄は除外）
+        names = [
+            self.name1.value,
+            self.name2.value,
+            self.name3.value,
+            self.name4.value,
+            self.name5.value,
+        ]
+        names = [n for n in names if n]
 
-        total = len(data["entries"]) + len(data["pending"]) + 1
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        messages = []
 
-        entry_data = {
-            "name": name,
-            "nickname": nickname,
-            "user": interaction.user.display_name,  # ← Discord の表示名を保存
-            "timestamp": now,
-        }
+        for name in names:
+            total = len(data["entries"]) + len(data["pending"]) + 1
+            now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        if total <= data["limit"]:
-            entry_data["number"] = total
-            data["entries"].append(entry_data)
-            msg = f"{total} {name} を登録しました。"
-        else:
-            data["pending"].append(entry_data)
-            msg = f"仮登録 {name} を登録しました。"
+            entry_data = {
+                "name": name,
+                "user": interaction.user.display_name,  # ← 表示名で保存
+                "timestamp": now,
+            }
 
-        await interaction.response.send_message(msg)
+            if total <= data["limit"]:
+                entry_data["number"] = total
+                data["entries"].append(entry_data)
+                messages.append(f"{total} {name} を登録しました。")
+            else:
+                data["pending"].append(entry_data)
+                messages.append(f"仮登録 {name} を登録しました。")
+
+        await interaction.response.send_message("\n".join(messages))
 
 
 # -----------------------------
@@ -45,7 +57,6 @@ class AddEntryModal(discord.ui.Modal, title="参加者追加"):
 class ChangeEntryModal(discord.ui.Modal, title="参加者変更"):
     old_name = discord.ui.TextInput(label="変更前の名前", required=True)
     new_name = discord.ui.TextInput(label="変更後の名前", required=True)
-    new_nickname = discord.ui.TextInput(label="新しいニックネーム（任意）", required=False)
 
     def __init__(self, bot):
         super().__init__()
@@ -55,13 +66,11 @@ class ChangeEntryModal(discord.ui.Modal, title="参加者変更"):
         data = self.bot.event_data
         old = self.old_name.value
         new = self.new_name.value
-        new_nick = self.new_nickname.value or None
 
         # 本登録
         for e in data["entries"]:
             if e["name"] == old:
                 e["name"] = new
-                e["nickname"] = new_nick
                 await interaction.response.send_message(f"{old} を {new} に変更しました。")
                 return
 
@@ -69,7 +78,6 @@ class ChangeEntryModal(discord.ui.Modal, title="参加者変更"):
         for p in data["pending"]:
             if p["name"] == old:
                 p["name"] = new
-                p["nickname"] = new_nick
                 await interaction.response.send_message(f"{old}（仮登録）を {new} に変更しました。")
                 return
 
