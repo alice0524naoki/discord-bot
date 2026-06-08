@@ -25,12 +25,10 @@ class FormEnd(commands.Cog):
             )
             return
 
-        # ★ 最初に応答（3秒以内）
         await interaction.response.defer()
 
-        # 表示用とファイル名用を分離
         safe_title = sanitize_filename(data["title"])
-        safe_date = sanitize_filename(data["date_file"])  # ← m-d が入っている
+        safe_date = sanitize_filename(data["date_file"])  # ← 5-6 が入っている
 
         filename = f"{safe_title}_{safe_date}.pdf"
 
