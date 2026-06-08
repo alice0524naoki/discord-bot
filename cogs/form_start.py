@@ -48,6 +48,16 @@ class FormStart(commands.Cog):
 
     @discord.app_commands.command(name="form_start", description="受付フォームを開始します")
     async def form_start(self, interaction: discord.Interaction):
+
+        # ★ 受付中チェック（重要）
+        if self.bot.event_data is not None:
+            await interaction.response.send_message(
+                "すでに受付が開始されています。\n終了するには /form_end を実行してください。",
+                ephemeral=True
+            )
+            return
+
+        # 受付が開始されていない場合のみフォームを出す
         modal = StartFormModal(self.bot)
         await interaction.response.send_modal(modal)
 
