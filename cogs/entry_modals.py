@@ -50,7 +50,7 @@ class AddEntryModal(discord.ui.Modal, title="参加者追加（最大5名）"):
                 data["pending"].append(pending)
                 messages.append(f"仮登録 {pending['name']} を登録しました。")
 
-        # ★ ここを修正：ephemeral=False（全員に見える）
+        # ★ 修正ポイント：ephemeral=False（全員に見える）
         await interaction.response.send_message("\n".join(messages))
 
 
