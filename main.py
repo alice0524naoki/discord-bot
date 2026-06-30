@@ -6,10 +6,13 @@ TOKEN = os.getenv("TOKEN")
 
 intents = discord.Intents.default()
 intents.message_content = True
+intents.voice_states = True
+intents.members = True
 
 class MyBot(commands.Bot):
     async def setup_hook(self):
         await self.load_extension("cogs.omikuji")
+        await self.load_extension("cogs.voice_notify")
         await self.tree.sync()
         print("スラッシュコマンドを同期しました")
 
