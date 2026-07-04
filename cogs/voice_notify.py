@@ -1,24 +1,8 @@
 import discord
 from discord.ext import commands
 
-# サーバーごとの設定
-GUILD_SETTINGS = {
-    1074637664503996446: { # Test
-        "role_id": 1243898257801871474,
-        "channel_id": 1074637664961179650,
-        "voice_name": "VC",
-    },
-    895995463965216798: { # K#Q
-        "role_id": 1521537000866582599,
-        "channel_id": 895995463965216801,
-        "voice_name": "ララジオ",
-    },
-    1384346771173675108: { # 討伐会
-        "role_id": 1384699338806132736,
-        "channel_id": 1384346771970326529,
-        "voice_name": "一人語り",
-    },
-}
+from config import GUILD_SETTINGS
+
 
 class VoiceNotify(commands.Cog):
     def __init__(self, bot):
@@ -61,6 +45,7 @@ class VoiceNotify(commands.Cog):
         await channel.send(
             f"🔊 {member.mention} さんが **{voice_name}** をはじめたみたいです|ω・)ﾁﾗｯ"
         )
+
 
 async def setup(bot):
     await bot.add_cog(VoiceNotify(bot))
