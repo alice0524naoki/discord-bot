@@ -43,7 +43,7 @@ class VoiceNotify(commands.Cog):
             return
 
         await channel.send(
-            f"🔊 {member.mention} さんが **{voice_name}** をはじめたみたいです|ω・)ﾁﾗｯ"
+            f"🔊 {member.mention} さんが **{voice_name}** をはじめたみたいです|ﾉω･)♥ﾁﾗｯ"
         )
 
 
