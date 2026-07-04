@@ -22,7 +22,7 @@ class Omikuji(commands.Cog):
             ("！！！", "extra.jpeg")
         ]
 
-        weights = [13, 19, 20, 18, 14, 8, 8000]
+        weights = [13, 19, 20, 18, 14, 8, 800000]
 
         fortune, filename = random.choices(
             fortunes,
@@ -38,25 +38,29 @@ class Omikuji(commands.Cog):
             file=file
         )
 
-        # 「！！！」を引いたときのみ通知
+        # 「！！！」以外は通知しない
         if fortune != "！！！":
             return
 
-        # 指定サーバー以外では通知しない
+        # DMでは通知しない
         if interaction.guild is None:
             return
 
-        if interaction.guild.id != OMIKUJI_NOTIFY["guild_id"]:
+        # このサーバーが通知対象か確認
+        settings = OMIKUJI_NOTIFY.get(interaction.guild.id)
+        if settings is None:
             return
 
-        # 指定役職を持っているか確認
-        if not any(role.id == OMIKUJI_NOTIFY["role_id"] for role in interaction.user.roles):
+        # 指定ロールを持っているか確認
+        if not any(role.id == settings["role_id"] for role in interaction.user.roles):
             return
 
-        channel = interaction.guild.get_channel(OMIKUJI_NOTIFY["channel_id"])
+        # 通知チャンネル取得
+        channel = interaction.guild.get_channel(settings["channel_id"])
         if channel is None:
             return
 
+        # 通知
         await channel.send(
             f"🎉 {interaction.user.mention} さんが **！！！** を引きました！"
         )
