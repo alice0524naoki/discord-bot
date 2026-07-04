@@ -62,7 +62,7 @@ class Omikuji(commands.Cog):
 
         # 通知
         await channel.send(
-            f"🎉 {interaction.user.mention} さんが **！！！** を引きました！"
+            f"🎉 ｵﾐ(*･∀･*)ｴｯﾁｰ!!"
         )
 
 
