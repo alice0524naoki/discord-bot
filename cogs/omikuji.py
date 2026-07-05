@@ -26,7 +26,7 @@ class Omikuji(commands.Cog):
         ]
 
         # デフォルト重み
-        weights = [13, 19, 20, 18, 14, 8, 8]
+        weights = [13, 19, 20, 18, 14, 8, 0]
 
         # サーバーごとの重み設定
         if interaction.guild is not None:
