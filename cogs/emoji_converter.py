@@ -52,10 +52,10 @@ class EmojiConverter(commands.Cog):
 
     @app_commands.command(
         name="emoji",
-        description="調整中"
+        description="絵文字変換"
     )
     @app_commands.describe(
-        text="変換したい文字"
+        text="変換したい文字(ひらがな,カタカナ)"
     )
     async def emoji(
         self,
