@@ -9,7 +9,10 @@ class Omikuji(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @discord.app_commands.command(name="omikuji", description="オミくじを引きます")
+    @discord.app_commands.command(
+        name="omikuji",
+        description="オミくじを引きます"
+    )
     async def omikuji(self, interaction: discord.Interaction):
 
         fortunes = [
@@ -22,7 +25,15 @@ class Omikuji(commands.Cog):
             ("！！！", "extra.jpeg")
         ]
 
-        weights = [13, 18, 20, 18, 13, 8, 10]
+        # デフォルト重み
+        weights = [13, 19, 20, 18, 14, 8, 8]
+
+        # サーバーごとの重み設定
+        if interaction.guild is not None:
+            settings = OMIKUJI_NOTIFY.get(interaction.guild.id)
+
+            if settings is not None and "weights" in settings:
+                weights = settings["weights"]
 
         fortune, filename = random.choices(
             fortunes,
@@ -42,27 +53,29 @@ class Omikuji(commands.Cog):
         if fortune != "！！！":
             return
 
-        # DMでは通知しない
         if interaction.guild is None:
             return
 
-        # このサーバーが通知対象か確認
         settings = OMIKUJI_NOTIFY.get(interaction.guild.id)
         if settings is None:
             return
 
         # 指定ロールを持っているか確認
-        if not any(role.id == settings["role_id"] for role in interaction.user.roles):
+        if not any(
+            role.id == settings["role_id"]
+            for role in interaction.user.roles
+        ):
             return
 
-        # 通知チャンネル取得
-        channel = interaction.guild.get_channel(settings["channel_id"])
+        channel = interaction.guild.get_channel(
+            settings["channel_id"]
+        )
+
         if channel is None:
             return
 
-        # 通知
         await channel.send(
-            f"🎉 ｵﾐ(*･∀･*)ｴｯﾁｰ!!"
+            f"🎉 {interaction.user.mention} さんが **！！！** を引きました！"
         )
 
 
