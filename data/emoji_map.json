@@ -197,16 +197,5 @@
     "ャ": "kt_xya",
     "ュ": "kt_xyu",
     "ョ": "kt_xyo",
-    "ッ": "kt_xtu",
-
-    "！": "sym_exclamation",
-    "？": "sym_question",
-    "。": "sym_period",
-    "、": "sym_comma",
-    "・": "sym_middle_dot",
-    "「": "sym_lquote",
-    "」": "sym_rquote",
-    "（": "sym_lparen",
-    "）": "sym_rparen",
-    " ": "sym_space"
+    "ッ": "kt_xtu"
 }
