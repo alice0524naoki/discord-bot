@@ -25,7 +25,7 @@ class EmojiConverter(commands.Cog):
             return
 
         # emoji_map.json
-        json_path = Path("emoji_map.json")
+        json_path = Path(__file__).parent.parent / "data" / "emoji_map.json"
 
         with open(json_path, "r", encoding="utf-8") as f:
             self.char_map = json.load(f)
@@ -52,7 +52,7 @@ class EmojiConverter(commands.Cog):
 
     @app_commands.command(
         name="emoji",
-        description="文字列をアプリ絵文字へ変換します"
+        description="調整中"
     )
     @app_commands.describe(
         text="変換したい文字"
