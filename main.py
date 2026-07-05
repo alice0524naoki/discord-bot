@@ -13,6 +13,7 @@ class MyBot(commands.Bot):
     async def setup_hook(self):
         await self.load_extension("cogs.omikuji")
         await self.load_extension("cogs.voice_notify")
+        await self.load_extension("cogs.emoji_converter")
         await self.tree.sync()
         print("スラッシュコマンドを同期しました")
 
