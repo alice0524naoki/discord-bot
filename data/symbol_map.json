@@ -1,3 +1,9 @@
 {
-  
+    "(": "sym_lparen",
+    ")": "sym_rparen",
+    "*": "sym_asterisk",
+    "･": "sym_middle_dot_half",
+    "∀": "sym_forall",
+    "!": "sym_exclamation",
+    "?": "sym_question"
 }
