@@ -11,32 +11,31 @@ class EmojiConverter(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-        # 「文字 → 絵文字名」
+        # 文字 → 絵文字名
         self.char_map = {}
 
-        # 「絵文字名 → <:name:id>」
+        # 絵文字名 → <:name:id>
         self.emoji_cache = {}
 
         self.loaded = False
 
-        # Discord構文を保護する正規表現
+        # Discord構文
         self.discord_pattern = re.compile(
-            r"<a?:[A-Za-z0-9_]+:\d+>"      # カスタム絵文字
-            r"|<@[!&]?\d+>"                # ユーザー・ロールメンション
-            r"|<#\d+>"                     # チャンネルメンション
-            r"|<t:\d+(?::[tTdDfFR])?>"     # タイムスタンプ
-            r"|https?://\S+"               # URL
+            r"(<a?:[A-Za-z0-9_]+:\d+>"      # カスタム絵文字
+            r"|<@[!&]?\d+>"                 # ユーザー・ロール
+            r"|<#\d+>"                      # チャンネル
+            r"|<t:\d+(?::[tTdDfFR])?>"      # タイムスタンプ
+            r"|https?://\S+)"               # URL
         )
 
     async def load_data(self):
-        """JSON・アプリ絵文字を読み込む"""
 
         if self.loaded:
             return
 
         data_dir = Path(__file__).parent.parent / "data"
 
-        # dataフォルダ内の *_map.json を自動読み込み
+        # *_map.json をすべて読み込む
         for path in sorted(data_dir.glob("*_map.json")):
 
             with open(path, "r", encoding="utf-8") as f:
@@ -59,18 +58,8 @@ class EmojiConverter(commands.Cog):
     async def on_ready(self):
         await self.load_data()
 
-    def convert_text(self, text: str) -> str:
-        """文字列をアプリ絵文字へ変換"""
-
-        protected = {}
-
-        def save(match):
-            key = f"__DISCORD_{len(protected)}__"
-            protected[key] = match.group(0)
-            return key
-
-        # Discord構文を一時退避
-        text = self.discord_pattern.sub(save, text)
+    def convert_segment(self, text: str) -> str:
+        """Discord構文以外を変換"""
 
         result = []
 
@@ -85,17 +74,32 @@ class EmojiConverter(commands.Cog):
                     result.append(emoji)
                 else:
                     result.append(ch)
-
             else:
                 result.append(ch)
 
-        result = "".join(result)
+        return "".join(result)
 
-        # Discord構文を復元
-        for key, value in protected.items():
-            result = result.replace(key, value)
+    def convert_text(self, text: str) -> str:
+        """Discord構文を壊さず変換"""
 
-        return result
+        parts = self.discord_pattern.split(text)
+
+        result = []
+
+        for part in parts:
+
+            if not part:
+                continue
+
+            # Discord構文ならそのまま
+            if self.discord_pattern.fullmatch(part):
+                result.append(part)
+
+            # 通常文字だけ変換
+            else:
+                result.append(self.convert_segment(part))
+
+        return "".join(result)
 
     @app_commands.command(
         name="emoji",
