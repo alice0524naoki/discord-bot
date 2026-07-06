@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 import discord
@@ -10,13 +11,22 @@ class EmojiConverter(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-        # 全ての文字マップ
+        # 「文字 → 絵文字名」
         self.char_map = {}
 
-        # アプリ絵文字キャッシュ
+        # 「絵文字名 → <:name:id>」
         self.emoji_cache = {}
 
         self.loaded = False
+
+        # Discord構文を保護する正規表現
+        self.discord_pattern = re.compile(
+            r"<a?:[A-Za-z0-9_]+:\d+>"      # カスタム絵文字
+            r"|<@[!&]?\d+>"                # ユーザー・ロールメンション
+            r"|<#\d+>"                     # チャンネルメンション
+            r"|<t:\d+(?::[tTdDfFR])?>"     # タイムスタンプ
+            r"|https?://\S+"               # URL
+        )
 
     async def load_data(self):
         """JSON・アプリ絵文字を読み込む"""
@@ -26,21 +36,8 @@ class EmojiConverter(commands.Cog):
 
         data_dir = Path(__file__).parent.parent / "data"
 
-        json_files = (
-            "hiragana_map.json",
-            "katakana_map.json",
-            "alphabet_map.json",
-            "number_map.json",
-            "symbol_map.json"
-        )
-
-        # JSONを結合
-        for filename in json_files:
-            path = data_dir / filename
-
-            if not path.exists():
-                print(f"[EmojiConverter] {filename} が見つかりません")
-                continue
+        # dataフォルダ内の *_map.json を自動読み込み
+        for path in sorted(data_dir.glob("*_map.json")):
 
             with open(path, "r", encoding="utf-8") as f:
                 self.char_map.update(json.load(f))
@@ -62,18 +59,18 @@ class EmojiConverter(commands.Cog):
     async def on_ready(self):
         await self.load_data()
 
-    @app_commands.command(
-        name="emoji",
-        description="文字をアプリ絵文字へ変換します"
-    )
-    @app_commands.describe(
-        text="変換する文字列"
-    )
-    async def emoji(
-        self,
-        interaction: discord.Interaction,
-        text: str
-    ):
+    def convert_text(self, text: str) -> str:
+        """文字列をアプリ絵文字へ変換"""
+
+        protected = {}
+
+        def save(match):
+            key = f"__DISCORD_{len(protected)}__"
+            protected[key] = match.group(0)
+            return key
+
+        # Discord構文を一時退避
+        text = self.discord_pattern.sub(save, text)
 
         result = []
 
@@ -82,7 +79,6 @@ class EmojiConverter(commands.Cog):
             emoji_name = self.char_map.get(ch)
 
             if emoji_name:
-
                 emoji = self.emoji_cache.get(emoji_name)
 
                 if emoji:
@@ -93,8 +89,29 @@ class EmojiConverter(commands.Cog):
             else:
                 result.append(ch)
 
+        result = "".join(result)
+
+        # Discord構文を復元
+        for key, value in protected.items():
+            result = result.replace(key, value)
+
+        return result
+
+    @app_commands.command(
+        name="emoji",
+        description="文字列をアプリ絵文字へ変換します"
+    )
+    @app_commands.describe(
+        text="変換したい文字列"
+    )
+    async def emoji(
+        self,
+        interaction: discord.Interaction,
+        text: str
+    ):
+
         await interaction.response.send_message(
-            "".join(result)
+            self.convert_text(text)
         )
 
 
