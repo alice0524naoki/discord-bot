@@ -10,27 +10,42 @@ class EmojiConverter(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-        # 「文字 → 絵文字名」
+        # 全ての文字マップ
         self.char_map = {}
 
-        # 「絵文字名 → <:name:id>」
+        # アプリ絵文字キャッシュ
         self.emoji_cache = {}
 
         self.loaded = False
 
     async def load_data(self):
-        """JSONとアプリ絵文字を読み込む（起動時1回のみ）"""
+        """JSON・アプリ絵文字を読み込む"""
 
         if self.loaded:
             return
 
-        # emoji_map.json
-        json_path = Path(__file__).parent.parent / "data" / "emoji_map.json"
+        data_dir = Path(__file__).parent.parent / "data"
 
-        with open(json_path, "r", encoding="utf-8") as f:
-            self.char_map = json.load(f)
+        json_files = (
+            "hiragana_map.json",
+            "katakana_map.json",
+            "alphabet_map.json",
+            "number_map.json",
+            "symbol_map.json"
+        )
 
-        # アプリ絵文字取得
+        # JSONを結合
+        for filename in json_files:
+            path = data_dir / filename
+
+            if not path.exists():
+                print(f"[EmojiConverter] {filename} が見つかりません")
+                continue
+
+            with open(path, "r", encoding="utf-8") as f:
+                self.char_map.update(json.load(f))
+
+        # アプリ絵文字取得（起動時1回）
         emojis = await self.bot.fetch_application_emojis()
 
         self.emoji_cache = {
@@ -40,11 +55,8 @@ class EmojiConverter(commands.Cog):
 
         self.loaded = True
 
-        print(
-            f"[EmojiConverter] "
-            f"{len(self.char_map)}文字 "
-            f"/ {len(self.emoji_cache)}個の絵文字を読み込みました"
-        )
+        print(f"[EmojiConverter] {len(self.char_map)}文字を読み込み")
+        print(f"[EmojiConverter] {len(self.emoji_cache)}個の絵文字をキャッシュ")
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -52,10 +64,10 @@ class EmojiConverter(commands.Cog):
 
     @app_commands.command(
         name="emoji",
-        description="絵文字変換"
+        description="文字をアプリ絵文字へ変換します"
     )
     @app_commands.describe(
-        text="変換したい文字(ひらがな,カタカナ)"
+        text="変換する文字列"
     )
     async def emoji(
         self,
@@ -67,20 +79,19 @@ class EmojiConverter(commands.Cog):
 
         for ch in text:
 
-            # 日本語 → 絵文字名
             emoji_name = self.char_map.get(ch)
 
             if emoji_name:
 
-                # 絵文字名 → 実際の絵文字
                 emoji = self.emoji_cache.get(emoji_name)
 
                 if emoji:
                     result.append(emoji)
-                    continue
+                else:
+                    result.append(ch)
 
-            # 見つからない文字はそのまま
-            result.append(ch)
+            else:
+                result.append(ch)
 
         await interaction.response.send_message(
             "".join(result)
