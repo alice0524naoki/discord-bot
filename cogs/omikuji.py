@@ -28,12 +28,17 @@ class Omikuji(commands.Cog):
         # デフォルト重み
         weights = [13, 19, 20, 18, 14, 8, 0]
 
-        # サーバーごとの重み設定
+        # サーバーごとの設定
         if interaction.guild is not None:
             settings = OMIKUJI_NOTIFY.get(interaction.guild.id)
 
-            if settings is not None and "weights" in settings:
-                weights = settings["weights"]
+            if settings is not None:
+                # 通常の重み
+                weights = settings.get("weights", weights)
+
+                # 通知対象ロールを持っている人だけ別の重みを使用
+                if any(role.id == settings["role_id"] for role in interaction.user.roles):
+                    weights = settings.get("role_weights", weights)
 
         fortune, filename = random.choices(
             fortunes,
@@ -75,7 +80,7 @@ class Omikuji(commands.Cog):
             return
 
         await channel.send(
-            f"🎉 {interaction.user.mention} さんが **！！！** を引きました！"
+            f"🎉 ｵﾐ(*･∀･*)ｴｯﾁｰ!!"
         )
 
 
