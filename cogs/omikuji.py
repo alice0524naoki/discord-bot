@@ -15,30 +15,52 @@ class Omikuji(commands.Cog):
     )
     async def omikuji(self, interaction: discord.Interaction):
 
-        fortunes = [
-            ("大吉", "daikichi.jpeg"),
-            ("中吉", "chukichi.jpeg"),
-            ("吉", "kichi.jpeg"),
-            ("小吉", "shokichi.jpeg"),
-            ("末吉", "suekichi.jpeg"),
-            ("凶", "kyou.jpeg"),
-            ("！！！", "extra.jpeg")
-        ]
+        settings = None
 
-        # デフォルト重み
-        weights = [13, 19, 20, 18, 14, 8, 0]
-
-        # サーバーごとの設定
         if interaction.guild is not None:
             settings = OMIKUJI_NOTIFY.get(interaction.guild.id)
 
-            if settings is not None:
-                # 通常の重み
-                weights = settings.get("weights", weights)
+        # 設定ファイルに登録されているサーバーのみ超大当たりを追加
+        if settings is not None:
+            fortunes = [
+                ("大吉", "daikichi.jpeg"),
+                ("中吉", "chukichi.jpeg"),
+                ("吉", "kichi.jpeg"),
+                ("小吉", "shokichi.jpeg"),
+                ("末吉", "suekichi.jpeg"),
+                ("凶", "kyou.jpeg"),
+                ("！！！", "extra.jpeg"),
+                ("超大当たり", "super.jpeg")
+            ]
 
-                # 通知対象ロールを持っている人だけ別の重みを使用
-                if any(role.id == settings["role_id"] for role in interaction.user.roles):
-                    weights = settings.get("role_weights", weights)
+            weights = settings.get(
+                "weights",
+                [13, 19, 20, 18, 14, 8, 8, 0]
+            )
+
+            # 通知対象ロールは専用重み
+            if any(
+                role.id == settings["role_id"]
+                for role in interaction.user.roles
+            ):
+                weights = settings.get(
+                    "role_weights",
+                    weights
+                )
+
+        # 設定ファイルに無いサーバーは従来どおり
+        else:
+            fortunes = [
+                ("大吉", "daikichi.jpeg"),
+                ("中吉", "chukichi.jpeg"),
+                ("吉", "kichi.jpeg"),
+                ("小吉", "shokichi.jpeg"),
+                ("末吉", "suekichi.jpeg"),
+                ("凶", "kyou.jpeg"),
+                ("！！！", "extra.jpeg")
+            ]
+
+            weights = [13, 19, 20, 18, 14, 8, 0]
 
         fortune, filename = random.choices(
             fortunes,
@@ -54,22 +76,12 @@ class Omikuji(commands.Cog):
             file=file
         )
 
-        # 「！！！」以外は通知しない
-        if fortune != "！！！":
-            return
-
+        # DMでは通知しない
         if interaction.guild is None:
             return
 
         settings = OMIKUJI_NOTIFY.get(interaction.guild.id)
         if settings is None:
-            return
-
-        # 指定ロールを持っているか確認
-        if not any(
-            role.id == settings["role_id"]
-            for role in interaction.user.roles
-        ):
             return
 
         channel = interaction.guild.get_channel(
@@ -79,8 +91,31 @@ class Omikuji(commands.Cog):
         if channel is None:
             return
 
+        # ==========================
+        # 超大当たり
+        # （役職関係なく通知）
+        # ==========================
+        if fortune == "超大当たり":
+            await channel.send(
+                f"🎊🎊 ｽｰﾊﾟｰｵﾐ(*･∀･*)ｴｯﾁｰ!! 🎊🎊"
+            )
+            return
+
+        # ==========================
+        # シークレット（！！！）
+        # （従来どおり通知対象ロールのみ）
+        # ==========================
+        if fortune != "！！！":
+            return
+
+        if not any(
+            role.id == settings["role_id"]
+            for role in interaction.user.roles
+        ):
+            return
+
         await channel.send(
-            f"🎉 ｵﾐ(*･∀･*)ｴｯﾁｰ!!"
+            "🎉 ｵﾐ(*･∀･*)ｴｯﾁｰ!!"
         )
 
 
