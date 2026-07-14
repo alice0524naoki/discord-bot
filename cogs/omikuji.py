@@ -30,7 +30,7 @@ class Omikuji(commands.Cog):
                 ("末吉", "suekichi.jpeg"),
                 ("凶", "kyou.jpeg"),
                 ("！！！", "extra.jpeg"),
-                ("超大当たり", "super.jpeg")
+                ("超大当たり", "special.mp4")
             ]
 
             weights = settings.get(
