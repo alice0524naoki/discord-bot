@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import os
 
-from config import OMIKUJI_NOTIFY
+from config import AIJIN_POWER_SETTINGS
 
 TOKEN = os.getenv("TOKEN")
 
@@ -18,17 +18,19 @@ intents.members = True
 
 class MyBot(commands.Bot):
     async def setup_hook(self):
-        # Cogの読み込み
+        # 既存のCog
         await self.load_extension("cogs.omikuji")
         await self.load_extension("cogs.voice_notify")
         await self.load_extension("cogs.emoji_converter")
+
+        # 新しいCog
         await self.load_extension("cogs.aijin_power")
 
-        # グローバルコマンドを同期
+        # 既存のグローバルコマンドを同期
         await self.tree.sync()
 
-        # 愛人パワーコマンドを対象サーバーに同期
-        for guild_id in OMIKUJI_NOTIFY:
+        # 愛人パワーを対象サーバーだけに同期
+        for guild_id in AIJIN_POWER_SETTINGS:
             guild = discord.Object(id=guild_id)
             await self.tree.sync(guild=guild)
 
