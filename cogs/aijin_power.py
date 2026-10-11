@@ -1,15 +1,22 @@
-
 import discord
 from discord.ext import commands
 import random
 
-from config import OMIKUJI_NOTIFY
+from config import AIJIN_POWER_SETTINGS
+
+
+# 設定に登録されているサーバーだけにコマンドを登録
+AIJIN_GUILDS = [
+    discord.Object(id=guild_id)
+    for guild_id in AIJIN_POWER_SETTINGS
+]
 
 
 class AijinPower(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @discord.app_commands.guilds(*AIJIN_GUILDS)
     @discord.app_commands.command(
         name="aijin_power",
         description="愛人パワーを測定します"
@@ -26,8 +33,8 @@ class AijinPower(commands.Cog):
             )
             return
 
-        # 設定済みサーバーのみ使用可能
-        settings = OMIKUJI_NOTIFY.get(
+        # 登録されたサーバーか確認
+        settings = AIJIN_POWER_SETTINGS.get(
             interaction.guild.id
         )
 
@@ -38,10 +45,9 @@ class AijinPower(commands.Cog):
             )
             return
 
-        # 既存のrole_idを使用
+        # 特定ロールを持つユーザーは専用メッセージのみ
         target_role_id = settings["role_id"]
 
-        # 特定ロールを持つユーザーは専用メッセージのみ
         if any(
             role.id == target_role_id
             for role in interaction.user.roles
@@ -51,7 +57,7 @@ class AijinPower(commands.Cog):
             )
             return
 
-        # 愛人パワー抽選
+        # 抽選
         roll = random.random()
 
         if roll < 0.90:
