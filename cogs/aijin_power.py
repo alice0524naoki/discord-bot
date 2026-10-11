@@ -1,3 +1,4 @@
+
 import discord
 from discord.ext import commands
 import random
@@ -25,12 +26,14 @@ class AijinPower(commands.Cog):
             )
             return
 
-        # OMIKUJI_NOTIFYに登録されているサーバーのみ使用可能
-        settings = OMIKUJI_NOTIFY.get(interaction.guild.id)
+        # 設定済みサーバーのみ使用可能
+        settings = OMIKUJI_NOTIFY.get(
+            interaction.guild.id
+        )
 
         if settings is None:
             await interaction.response.send_message(
-                "このサーバーでは使用できないコマンドです。",
+                "このサーバーでは使用できません。",
                 ephemeral=True
             )
             return
