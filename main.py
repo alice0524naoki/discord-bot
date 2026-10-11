@@ -14,6 +14,7 @@ class MyBot(commands.Bot):
         await self.load_extension("cogs.omikuji")
         await self.load_extension("cogs.voice_notify")
         await self.load_extension("cogs.emoji_converter")
+        await self.load_extension("cogs.aijin_power")
         await self.tree.sync()
         print("スラッシュコマンドを同期しました")
 
