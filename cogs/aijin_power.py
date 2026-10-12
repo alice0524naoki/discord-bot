@@ -44,7 +44,8 @@ class AijinPower(commands.Cog):
                 ephemeral=True
             )
             return
-
+            
+        
         # 特定ロールを持つユーザーは専用メッセージのみ
         target_role_id = settings["role_id"]
 
@@ -53,7 +54,7 @@ class AijinPower(commands.Cog):
             for role in interaction.user.roles
         ):
             await interaction.response.send_message(
-                "あなたは愛人を作る側です(*･∀･*)ｴｯﾁｰ!!"
+                f"{interaction.user.mention} は愛人を作る側です(*･∀･*)ｴｯﾁｰ!!"
             )
             return
 
@@ -69,8 +70,7 @@ class AijinPower(commands.Cog):
 
         # 結果を表示
         await interaction.response.send_message(
-            f"{interaction.user.display_name}の"
-            f"愛人パワーは{power}です！"
+            f"{interaction.user.mention} の愛人パワーは{power}です！"
         )
 
 
