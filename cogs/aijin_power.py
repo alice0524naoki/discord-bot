@@ -78,7 +78,7 @@ class AijinPower(commands.Cog):
         )
 
         # 100と1000以外は通知しない
-        if power not in (100, 1000):
+        if power not in (1000, 10000):
             return
 
         # 通知先チャンネルを取得
@@ -94,7 +94,7 @@ class AijinPower(commands.Cog):
             return
 
         # 愛人パワー100の通知
-        if power == 100:
+        if power == 1000:
             message = (
                 f"{interaction.user.mention} は"
                 "完ぺきな愛人です(((o(*ﾟ▽ﾟ*)o)))"
