@@ -5,7 +5,7 @@ import random
 from config import AIJIN_POWER_SETTINGS
 
 
-# 設定に登録されているサーバーだけにコマンドを登録
+# 設定されたサーバーにだけコマンドを登録
 AIJIN_GUILDS = [
     discord.Object(id=guild_id)
     for guild_id in AIJIN_POWER_SETTINGS
@@ -13,7 +13,7 @@ AIJIN_GUILDS = [
 
 
 class AijinPower(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @discord.app_commands.guilds(*AIJIN_GUILDS)
@@ -25,7 +25,7 @@ class AijinPower(commands.Cog):
         self,
         interaction: discord.Interaction
     ):
-        # DMでは使用不可
+        # サーバー内でのみ実行可能
         if interaction.guild is None:
             await interaction.response.send_message(
                 "このコマンドはサーバー内でのみ使用できます。",
@@ -33,7 +33,7 @@ class AijinPower(commands.Cog):
             )
             return
 
-        # 登録されたサーバーか確認
+        # サーバーごとの設定を取得
         settings = AIJIN_POWER_SETTINGS.get(
             interaction.guild.id
         )
@@ -44,9 +44,8 @@ class AijinPower(commands.Cog):
                 ephemeral=True
             )
             return
-            
-        
-        # 特定ロールを持つユーザーは専用メッセージのみ
+
+        # 特別なロールを持つユーザーは抽選しない
         target_role_id = settings["role_id"]
 
         if any(
@@ -54,11 +53,15 @@ class AijinPower(commands.Cog):
             for role in interaction.user.roles
         ):
             await interaction.response.send_message(
-                f"{interaction.user.mention} は愛人を作る側です(*･∀･*)ｴｯﾁｰ!!"
+                f"{interaction.user.mention} は"
+                "愛人を作る側です(*･∀･*)ｴｯﾁｰ!!"
             )
             return
 
-        # 抽選
+        # 愛人パワーを抽選
+        # 1～100：90%
+        # 1000：8%
+        # 10000：2%
         roll = random.random()
 
         if roll < 0.90:
@@ -68,11 +71,45 @@ class AijinPower(commands.Cog):
         else:
             power = 10000
 
-        # 結果を表示
+        # 抽選結果を表示
         await interaction.response.send_message(
-            f"{interaction.user.mention} の愛人パワーは{power}です！"
+            f"{interaction.user.mention} の"
+            f"愛人パワーは{power}です！"
         )
 
+        # 100と1000以外は通知しない
+        if power not in (100, 1000):
+            return
 
-async def setup(bot):
+        # 通知先チャンネルを取得
+        channel = interaction.guild.get_channel(
+            settings["channel_id"]
+        )
+
+        if channel is None:
+            print(
+                "愛人パワー通知先が見つかりません: "
+                f"{settings['channel_id']}"
+            )
+            return
+
+        # 愛人パワー100の通知
+        if power == 100:
+            message = (
+                f"{interaction.user.mention} は"
+                "完ぺきな愛人です(((o(*ﾟ▽ﾟ*)o)))"
+            )
+
+        # 愛人パワー1000の通知
+        else:
+            message = (
+                f"<@&{settings['role_id']}> "
+                f"{interaction.user.mention} "
+                "おみ(*･∀･*)ｴｯﾁｰ!!"
+            )
+
+        await channel.send(message)
+
+
+async def setup(bot: commands.Bot):
     await bot.add_cog(AijinPower(bot))
