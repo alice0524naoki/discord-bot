@@ -45,11 +45,12 @@ class AijinPower(commands.Cog):
             )
             return
 
-        # 特別なロールを持つユーザーは抽選しない
-        target_role_id = settings["role_id"]
+        # 指定ロールID
+        role_id = settings["role_id"]
 
+        # 指定ロールを持つユーザーは抽選しない
         if any(
-            role.id == target_role_id
+            role.id == role_id
             for role in interaction.user.roles
         ):
             await interaction.response.send_message(
@@ -103,10 +104,10 @@ class AijinPower(commands.Cog):
         # 愛人パワー10000の通知
         else:
             target_role = interaction.guild.get_role(
-                settings["role_id"]
+                role_id
             )
 
-            # ロールを持つメンバーを個別にメンション
+            # 指定ロールを持つメンバーを個別にメンション
             if target_role is not None:
                 mentions = " ".join(
                     member.mention
