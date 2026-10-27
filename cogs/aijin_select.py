@@ -19,7 +19,7 @@ class AijinSelect(commands.Cog):
     @discord.app_commands.guilds(*AIJIN_GUILDS)
     @discord.app_commands.command(
         name="aijin_select",
-        description="今日の愛人を選びます"
+        description="今日の愛人は?(っ ॑꒳ ॑c)ﾜｸﾜｸ"
     )
     async def aijin_select(
         self,
@@ -45,20 +45,38 @@ class AijinSelect(commands.Cog):
             )
             return
 
-        # 実行者が必要なロールを持っているか確認
+        # 実行に必要なロールID
         role_id = settings["role_id"]
 
+        # 実行者が指定ロールを持っているか確認
         if not any(
             role.id == role_id
             for role in interaction.user.roles
         ):
+            # 指定ロールを持つメンバー本人を取得
+            target_role = interaction.guild.get_role(role_id)
+
+            role_member = (
+                next(iter(target_role.members), None)
+                if target_role is not None
+                else None
+            )
+
+            # メンバー本人をメンションして案内
+            if role_member is not None:
+                message = (
+                    f"このコマンドは{role_member.mention}専用です！"
+                )
+            else:
+                message = "このコマンドは指定メンバー専用です！"
+
             await interaction.response.send_message(
-                f"このコマンドは<@&{role_id}>内の人専用です！",
+                message,
                 ephemeral=True
             )
             return
 
-        # サーバー内のメンバーから選択
+        # サーバー内のBot以外のメンバーから選択
         members = [
             member
             for member in interaction.guild.members
