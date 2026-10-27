@@ -77,7 +77,7 @@ class AijinPower(commands.Cog):
             f"愛人パワーは{power}です！"
         )
 
-        # 100と1000以外は通知しない
+        # 1000と10000以外は通知しない
         if power not in (1000, 10000):
             return
 
@@ -93,17 +93,30 @@ class AijinPower(commands.Cog):
             )
             return
 
-        # 愛人パワー100の通知
+        # 愛人パワー1000の通知
         if power == 1000:
             message = (
                 f"{interaction.user.mention} は"
                 "完ぺきな愛人です(((o(*ﾟ▽ﾟ*)o)))"
             )
 
-        # 愛人パワー1000の通知
+        # 愛人パワー10000の通知
         else:
+            target_role = interaction.guild.get_role(
+                settings["role_id"]
+            )
+
+            # ロールを持つメンバーを個別にメンション
+            if target_role is not None:
+                mentions = " ".join(
+                    member.mention
+                    for member in target_role.members
+                )
+            else:
+                mentions = ""
+
             message = (
-                f"<@&{settings['role_id']}> "
+                f"{mentions} "
                 f"{interaction.user.mention} "
                 "おみ(*･∀･*)ｴｯﾁｰ!!"
             )
