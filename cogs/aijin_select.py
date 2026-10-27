@@ -70,10 +70,7 @@ class AijinSelect(commands.Cog):
             else:
                 message = "このコマンドは指定メンバー専用です！"
 
-            await interaction.response.send_message(
-                message,
-                ephemeral=True
-            )
+            await interaction.response.send_message(message)
             return
 
         # サーバー内のBot以外のメンバーから選択
