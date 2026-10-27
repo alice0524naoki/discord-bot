@@ -22,14 +22,13 @@ class MyBot(commands.Bot):
         await self.load_extension("cogs.omikuji")
         await self.load_extension("cogs.voice_notify")
         await self.load_extension("cogs.emoji_converter")
-
-        # 新しいCog
         await self.load_extension("cogs.aijin_power")
+        await self.load_extension("cogs.aijin_select")
 
         # 既存のグローバルコマンドを同期
         await self.tree.sync()
 
-        # 愛人パワーを対象サーバーだけに同期
+        # 対象サーバーだけに同期
         for guild_id in AIJIN_POWER_SETTINGS:
             guild = discord.Object(id=guild_id)
             await self.tree.sync(guild=guild)
